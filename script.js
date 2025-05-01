@@ -1,6 +1,6 @@
 
 // State
-let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+let currentUser = JSON.parse(localStorage.getItem('currentUser')) || [];
 let books = JSON.parse(localStorage.getItem('books')) || [];
 let users = JSON.parse(localStorage.getItem('users')) || [];
 
@@ -8,7 +8,8 @@ let users = JSON.parse(localStorage.getItem('users')) || [];
 async function loadLibraryData() {
     try {
         const response = await fetch('data.json');
-        if (!response.ok) throw new Error('Failed to fetch data.json');
+        if (!response.ok) 
+          throw new Error('Failed to fetch data.json');
         // const data = await response.json();
 // console.log(data, 88);
 if(books.length === 0) {
@@ -70,7 +71,8 @@ function saveUsers() {
 // Show alert
 function showAlert(message, type = 'success') {
     const alertContainer = document.getElementById('alertContainer');
-    if (!alertContainer) return console.error('Alert container not found');
+    if (!alertContainer)
+       return console.error('Alert container not found');
     alertContainer.innerHTML = `
         <div class="alert alert-${type} alert-dismissible fade show" role="alert">
             ${message}
@@ -92,23 +94,23 @@ function createBookCard(book) {
               <img src="${book.coverImage}" alt="${book.title}">
               <div class="book-info">
                   <strong>${book.title}</strong>
-                  <p>by ${book.author}</p>
+                  <p>By: ${book.author}</p>
                   <p>Genre: ${book.genre}</p>
-                  <p>Due Date: ${book.dueDate || "N/A"}</p> <!-- Display the due date -->
-                  <span class="badge ${book.isAvailability ? 'bg-success' : 'bg-danger'}">
+                  <p>Due Date: ${book.dueDate || []}</p> 
+                  <span class="badge ${book.isAvailability ? 'bg-success' : 'bg-danger '}">
                       ${book.isAvailability ? 'Available' : 'Borrowed'}
                   </span>
               </div>
               <div class="book-actions">
                   ${currentUser?.role === 'user' ? `
-                      <button class="btn btn-sm ${book.isAvailability ? 'btn-primary' : 'btn-secondary'}"
+                      <button class="btn btn-sm ${book.isAvailability ? 'btn-primary' : 'btn-secondary m-3'}"
                           onclick="handleBookAction(${book.id}, '${book.isAvailability ? 'borrow' : 'return'}')"
                           ${!book.isAvailability && book.borrowedBy !== currentUser.username ? 'disabled' : ''}>
                           ${book.isAvailability ? 'Borrow' : 'Return'}
                       </button>
                   ` : ''}
                   ${currentUser?.role === 'librarian' ? `
-                      <button class="btn btn-sm btn-danger"
+                      <button class="btn btn-sm btn-danger m-5 "
                           onclick="handleBookAction(${book.id}, 'delete')">
                           Delete
                       </button>
@@ -125,7 +127,7 @@ function displayBooks(searchTerm = '') {
     const borrowedBooksList = document.getElementById('borrowedBooksList');
     const myBorrowedBooks = document.getElementById('myBorrowedBooks');
 
-    if (userBookList) userBookList.innerHTML = '';
+    if (userBookList) userBookList.innerHTML = ''; console.log(userBookList)
     if (librarianBookList) librarianBookList.innerHTML = '';
     if (borrowedBooksList) borrowedBooksList.innerHTML = '';
 
@@ -202,78 +204,116 @@ function handleBookAction(bookId, action) {
   }
 
 // Update UI based on login state
-async function updateUI() {
-    await loadLibraryData();
-    const heroSection = document.getElementById('heroSection');
-    const dashboardSection = document.getElementById('dashboardSection');
-    const userDashboard = document.getElementById('userDashboard');
-    const librarianDashboard = document.getElementById('librarianDashboard');
-    const welcomeMessage = document.getElementById('welcomeMessage');
 
-    if (currentUser) {
-        heroSection.style.display = 'none';
-        dashboardSection.style.display = 'block';
-        welcomeMessage.textContent = `Welcome, ${currentUser.username}!`;
-        userDashboard.style.display = currentUser.role === 'user' ? 'block' : 'none';
-        librarianDashboard.style.display = currentUser.role === 'librarian' ? 'block' : 'none';
-        displayBooks();
-    } else {
-        heroSection.style.display = 'flex';
-        dashboardSection.style.display = 'none';
-        userDashboard.style.display = 'none';
-        librarianDashboard.style.display = 'none';
+
+async function updateUI() {
+  await loadLibraryData();
+  const heroSection = document.getElementById("heroSection");
+  const dashboardSection = document.getElementById("dashboardSection");
+  const userDashboard = document.getElementById("userDashboard");
+  const librarianDashboard = document.getElementById("librarianDashboard");
+  const welcomeMessage = document.getElementById("welcomeMessage");
+
+  if (currentUser) {
+    heroSection.style.display = "none";
+    dashboardSection.style.display = "block";
+    welcomeMessage.textContent = `Welcome, ${currentUser.username}!`;
+    userDashboard.style.display =
+      currentUser.role === "user" ? "block" : "none";
+    librarianDashboard.style.display =
+      currentUser.role === "librarian" ? "block" : "none";
+
+    displayBooks();
+
+    // Display borrowed books for librarian
+    if (currentUser.role === "librarian") {
+      displayBorrowedBooksForLibrarian();
     }
+  } else {
+    heroSection.style.display = "flex";
+    dashboardSection.style.display = "none";
+    userDashboard.style.display = "none";
+    librarianDashboard.style.display = "none";
+  }
 }
 
 // Event listeners
-document.getElementById('loginForm')?.addEventListener('submit', async e => {
-    e.preventDefault();
-    const username = document.getElementById('loginUsername').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    const role = document.getElementById('loginRole').value;
-    const loginError = document.getElementById('loginError');
 
+
+document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const username = document.getElementById("loginUsername").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    const role = document.getElementById("loginRole").value;
+    const loginError = document.getElementById("loginError");
+  
+    // Validation for username and password
+    if (!username || username.length < 3) {
+      loginError.textContent = "Username must be at least 3 characters long";
+      loginError.style.display = "block";
+      return;
+    }
+    if (!password || password.length < 5) {
+      loginError.textContent = "Password must be at least 6 characters long";
+      loginError.style.display = "block";
+      return;
+    }
+  
     await loadLibraryData();
-    const user = users.find(u => u.username === username && u.password === password && u.role === role);
-
+    const user = users.find(
+      (u) => u.username === username && u.password === password && u.role === role
+    );
+  
     if (user) {
-        currentUser = user;
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        loginError.style.display = 'none';
-        bootstrap.Modal.getInstance(document.getElementById('loginModal'))?.hide();
-        updateUI();
+      currentUser = user;
+      localStorage.setItem("currentUser", JSON.stringify(user));
+      loginError.style.display = "none";
+      bootstrap.Modal.getInstance(document.getElementById("loginModal"))?.hide();
+      document.getElementById("loginForm").reset(); 
+      updateUI();
     } else {
-        loginError.textContent = 'Invalid credentials or role';
-        loginError.style.display = 'block';
+      loginError.textContent = "Invalid credentials or role";
+      loginError.style.display = "block";
     }
-});
+  });
 
-document.getElementById('registerForm')?.addEventListener('submit', e => {
+
+  document.getElementById("registerForm")?.addEventListener("submit", (e) => {
     e.preventDefault();
-    const username = document.getElementById('registerUsername').value.trim();
-    const password = document.getElementById('registerPassword').value;
-    const registerError = document.getElementById('registerError');
-
-    if (!username || !password) {
-        registerError.textContent = 'Username and password required';
-        registerError.style.display = 'block';
-        return;
+    const username = document.getElementById("registerUsername").value.trim();
+    const password = document.getElementById("registerPassword").value;
+    const registerError = document.getElementById("registerError");
+  
+    // Validation for username and password
+    const usernameRegex = /^[a-zA-Z0-9_]+$/; // Only allow alphanumeric characters and underscores
+    if (!username || username.length < 3 || !usernameRegex.test(username)) {
+      registerError.textContent =
+        "Username must be at least 3 characters long and contain only letters, numbers, or underscores";
+      registerError.style.display = "block";
+      return;
     }
-
-    if (users.some(u => u.username === username)) {
-        registerError.textContent = 'Username already exists';
-        registerError.style.display = 'block';
-        return;
+    if (!password || password.length < 5) {
+      registerError.textContent = "Password must be at least 5 characters long";
+      registerError.style.display = "block";
+      return;
     }
-
-    users.push({ username, password, role: 'user' });
+  
+    if (users.some((u) => u.username === username)) {
+      registerError.textContent = "Username already exists";
+      registerError.style.display = "block";
+      return;
+    }
+  
+    users.push({ username, password, role: "user" });
     saveUsers();
-    registerError.style.display = 'none';
-    bootstrap.Modal.getInstance(document.getElementById('registerModal'))?.hide();
-    showAlert('Registration successful! Please log in.', 'success');
-    bootstrap.Modal.getOrCreateInstance(document.getElementById('loginModal')).show();
-});
-
+    registerError.style.display = "none";
+    bootstrap.Modal.getInstance(document.getElementById("registerModal"))?.hide();
+    document.getElementById("registerForm").reset(); 
+    showAlert("Registration successful! Please log in.", "success");
+    bootstrap.Modal.getOrCreateInstance(
+      document.getElementById("loginModal")
+    ).show();
+  });
 
 
 document.getElementById("addBookForm")?.addEventListener("submit", (e) => {
@@ -296,7 +336,7 @@ document.getElementById("addBookForm")?.addEventListener("submit", (e) => {
         isAvailability: true,
         coverImage,
         borrowedBy: null,
-        dueDate, // Add the due date to the book object
+        dueDate, 
       });
       saveBooks();
       displayBooks();
@@ -328,7 +368,7 @@ function logBorrow(book, user) {
       username: user.username,
       title: book.title,
       date: new Date().toLocaleString(),
-      dueDate: book.dueDate, // Log the due date
+      dueDate: book.dueDate, 
     });
     saveHistory();
   }
@@ -347,9 +387,35 @@ function logBorrow(book, user) {
     (currentUser.role === "user" ? userRecords : allRecords).forEach((record) => {
       const li = document.createElement("li");
       li.className = "list-group-item";
-      li.textContent = `${record.username} borrowed "${record.title}" on ${record.date} (Due: ${record.dueDate || "N/A"})`;
+      li.textContent = `${record.username} borrowed "${record.title}" on ${record.date} (Due: ${record.dueDate || []})`;
       if (currentUser.role === "user") userHistory.appendChild(li);
       else librarianHistory.appendChild(li);
+    });
+  }
+
+  function displayBorrowedBooksForLibrarian() {
+    const borrowedBooksListForLibrarian = document.getElementById("borrowedBooksListForLibrarian");
+  
+    if (borrowedBooksListForLibrarian) borrowedBooksListForLibrarian.innerHTML = "";
+  
+    // Filter books that are currently borrowed
+    const borrowedBooks = books.filter((book) => !book.isAvailability);
+  
+    // Render each borrowed book
+    borrowedBooks.forEach((book) => {
+      const bookCard = `
+        <div class="book-card">
+          <img src="${book.coverImage}" alt="${book.title}">
+          <div class="book-info">
+            <strong>${book.title}</strong>
+            <p>By: ${book.author}</p>
+            <p>Genre: ${book.genre}</p>
+            <p>Borrowed By: ${book.borrowedBy || "Unknown"}</p>
+            <p>Due Date: ${book.dueDate || "N/A"}</p>
+          </div>
+        </div>
+      `;
+      borrowedBooksListForLibrarian.innerHTML += bookCard;
     });
   }
 // Initialize

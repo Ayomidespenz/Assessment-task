@@ -15,8 +15,12 @@
   /* Navigation Bar */
   .navbar {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    background-color: #ffffff;
+    background-color: #ffffff67;
   }
+
+ 
+
+
   
   .navbar-brand {
     font-size: 1.5rem;
@@ -43,7 +47,7 @@
   .hero-section {
     position: relative;
     height: 100vh;
-    background: url('https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+    background: url(/image-folder/Most_Beautiful_Libraries.webp) no-repeat center center/cover;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -174,10 +178,13 @@
   }
   
   #searchButton {
-    background-color: #007bff;
-    border-color: #007bff;
+    background-color: #3b6796;
+    /* border-color: #007bff; */
+    border: none;
+    margin-left: 75%;
     color: #fff;
   }
+   
   
   #searchButton:hover {
     background-color: #0056b3;
@@ -185,7 +192,8 @@
   
   #clearSearch {
     background-color: #6c757d;
-    border-color: #6c757d;
+    /* border-color: #6c757d; */
+    border: none;
     color: #fff;
   }
   
