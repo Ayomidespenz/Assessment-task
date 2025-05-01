@@ -158,11 +158,12 @@ function displayBooks(searchTerm = '') {
 }
 
 // Handle book actions
-// function handleBookAction(bookId, action) {
+// function handleBookAction(bookId, action) 
 
 
 function handleBookAction(bookId, action) {
-    const book = books.find((b) => b.id === bookId);
+    const book =
+     books.find((b) => b.id === bookId);
     if (!book) {
       console.error("Book not found:", bookId);
       return showAlert("Book not found", "danger");
@@ -186,7 +187,7 @@ function handleBookAction(bookId, action) {
     ) {
       book.isAvailability = true;
       book.borrowedBy = null;
-      book.dueDate = null; // Clear the due date
+      book.dueDate = null; 
       showAlert(`You returned "${book.title}"`, "warning");
     } else if (action === "delete" && currentUser?.role === "librarian") {
       if (confirm(`Delete "${book.title}"?`)) {
@@ -217,7 +218,7 @@ async function updateUI() {
   if (currentUser) {
     heroSection.style.display = "none";
     dashboardSection.style.display = "block";
-    welcomeMessage.textContent = `Welcome, ${currentUser.username}!`;
+    welcomeMessage.textContent = `Welcome to our library, Happy to have you here ${currentUser.username}!`;
     userDashboard.style.display =
       currentUser.role === "user" ? "block" : "none";
     librarianDashboard.style.display =
@@ -285,7 +286,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     const registerError = document.getElementById("registerError");
   
     // Validation for username and password
-    const usernameRegex = /^[a-zA-Z0-9_]+$/; // Only allow alphanumeric characters and underscores
+    const usernameRegex = /^[a-zA-Z0-9_]+$/; 
     if (!username || username.length < 3 || !usernameRegex.test(username)) {
       registerError.textContent =
         "Username must be at least 3 characters long and contain only letters, numbers, or underscores";
@@ -316,34 +317,56 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
   });
 
 
+
 document.getElementById("addBookForm")?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (currentUser?.role !== "librarian") return;
-  
-    const title = document.getElementById("bookTitle").value.trim();
-    const author = document.getElementById("bookAuthor").value.trim();
-    const genre = document.getElementById("bookGenre").value.trim();
-    const coverImage = document.getElementById("bookCover").value.trim() || "";
-    const dueDate = document.getElementById("dueDate").value; // Get the due date
-  
-    if (title && author && genre && dueDate) {
-      const newId = books.length ? Math.max(...books.map((b) => b.id)) + 1 : 1;
-      books.push({
-        id: newId,
-        title,
-        author,
-        genre,
-        isAvailability: true,
-        coverImage,
-        borrowedBy: null,
-        dueDate, 
-      });
-      saveBooks();
-      displayBooks();
-      showAlert(`"${title}" added with a due date of ${dueDate}`, "success");
-      document.getElementById("addBookForm").reset();
-    }
+  e.preventDefault();
+
+  // Ensure the current user is a librarian
+  if (currentUser?.role !== "librarian") {
+      showAlert("Only librarians can add books.", "danger");
+      return;
+  }
+
+  // Get form input values
+  const title = document.getElementById("bookTitle")?.value.trim();
+  const author = document.getElementById("bookAuthor")?.value.trim();
+  const genre = document.getElementById("bookGenre")?.value.trim();
+  const coverImage = document.getElementById("bookCover")?.value.trim() || "";
+  const dueDate = document.getElementById("dueDate")?.value;
+
+  // Validate input fields
+  if (!title || !author || !genre ) {
+      showAlert("All fields except cover image are required.", "danger");
+      return;
+  }
+
+  // Generate a new book ID
+  const newId = books.length ? Math.max(...books.map((b) => b.id)) + 1 : 1;
+
+  // Add the new book to the books array
+  books.push({
+      id: newId,
+      title,
+      author,
+      genre,
+      isAvailability: true,
+      coverImage,
+      borrowedBy: null,
+      dueDate,
   });
+
+  // Save the updated books array to localStorage
+  saveBooks();
+
+  // Update the UI
+  displayBooks();
+
+  // Show success message
+  showAlert(`"${title}" has been added successfully!`, "success");
+
+  // Reset the form
+  document.getElementById("addBookForm").reset();
+});
 
 document.getElementById('logoutButton')?.addEventListener('click', () => {
     currentUser = null;
@@ -404,19 +427,22 @@ function logBorrow(book, user) {
     // Render each borrowed book
     borrowedBooks.forEach((book) => {
       const bookCard = `
-        <div class="book-card">
+        <div class="book-card d-flex">
           <img src="${book.coverImage}" alt="${book.title}">
           <div class="book-info">
             <strong>${book.title}</strong>
             <p>By: ${book.author}</p>
             <p>Genre: ${book.genre}</p>
             <p>Borrowed By: ${book.borrowedBy || "Unknown"}</p>
-            <p>Due Date: ${book.dueDate || "N/A"}</p>
+            <p>Due Date: ${book.dueDate || []}</p>
           </div>
         </div>
       `;
       borrowedBooksListForLibrarian.innerHTML += bookCard;
     });
   }
+
+
+   
 // Initialize
 updateUI();
