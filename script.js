@@ -219,32 +219,38 @@ async function updateUI() {
   const userDashboard = document.getElementById("userDashboard");
   const librarianDashboard = document.getElementById("librarianDashboard");
   const welcomeMessage = document.getElementById("welcomeMessage");
+  const aboutUsSection = document.getElementById("aboutUs");
 
   if (currentUser) {
-    heroSection.style.display = "none";
-    dashboardSection.style.display = "block";
-    welcomeMessage.textContent = `Welcome to our library, Happy to have you here ${currentUser.username}!`;
-    userDashboard.style.display =
-      currentUser.role === "user" ? "block" : "none";
-    librarianDashboard.style.display =
-      currentUser.role === "librarian" ? "block" : "none";
+      // User is logged in
+      heroSection.style.display = "none";
+      dashboardSection.style.display = "block";
+      welcomeMessage.textContent = `Welcome to our library, Happy to have you here ${currentUser.username}!`;
+      userDashboard.style.display = currentUser.role === "user" ? "block" : "none";
+      librarianDashboard.style.display = currentUser.role === "librarian" ? "block" : "none";
 
-    displayBooks();
+      displayBooks();
 
-    // retrieveOverdueBooks();
+      // Display borrowed books for librarian
+      if (currentUser.role === "librarian") {
+          displayBorrowedBooksForLibrarian();
+      }
 
-    // Display borrowed books for librarian
-    if (currentUser.role === "librarian") {
-      displayBorrowedBooksForLibrarian();
-    }
+      // Hide the About Us section
+      if (aboutUsSection) aboutUsSection.style.display = "none";
   } else {
-    heroSection.style.display = "flex";
-    dashboardSection.style.display = "none";
-    userDashboard.style.display = "none";
-    librarianDashboard.style.display = "none";
-  }
-  if (aboutUsSection) aboutUsSection.style.display = "block";
+      // User is logged out
+      heroSection.style.display = "flex";
+      dashboardSection.style.display = "none";
+      userDashboard.style.display = "none";
+      librarianDashboard.style.display = "none";
 
+      // Clear the welcome message
+      if (welcomeMessage) welcomeMessage.textContent = "";
+
+      // Show the About Us section
+      if (aboutUsSection) aboutUsSection.style.display = "block";
+  }
 }
 
 // Event listeners
