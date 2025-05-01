@@ -82,7 +82,7 @@ function showAlert(message, type = 'success') {
     setTimeout(() => {
         const alert = alertContainer.querySelector('.alert');
         if (alert) bootstrap.Alert.getOrCreateInstance(alert).close();
-    }, 3000);
+    }, 5000);
 }
 
 // Render book card
@@ -127,7 +127,7 @@ function displayBooks(searchTerm = '') {
     const borrowedBooksList = document.getElementById('borrowedBooksList');
     const myBorrowedBooks = document.getElementById('myBorrowedBooks');
 
-    if (userBookList) userBookList.innerHTML = ''; console.log(userBookList)
+    if (userBookList) userBookList.innerHTML = ''; 
     if (librarianBookList) librarianBookList.innerHTML = '';
     if (borrowedBooksList) borrowedBooksList.innerHTML = '';
 
@@ -157,52 +157,57 @@ function displayBooks(searchTerm = '') {
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 }
 
-// Handle book actions
+
 // function handleBookAction(bookId, action) 
 
 
 function handleBookAction(bookId, action) {
-    const book =
-     books.find((b) => b.id === bookId);
+    const book = books.find((b) => b.id === bookId);
     if (!book) {
-      console.error("Book not found:", bookId);
-      return showAlert("Book not found", "danger");
+        console.error("Book not found:", bookId);
+        return showAlert("Book not found", "danger");
     }
-  
+
     if (action === "borrow" && book.isAvailability) {
-      book.isAvailability = false;
-      book.borrowedBy = currentUser.username;
-  
-      // Calculate the due date (10 days from today)
-      const currentDate = new Date();
-      const dueDate = new Date(currentDate);
-      dueDate.setDate(currentDate.getDate() + 10); // Add 10 days
-      book.dueDate = dueDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
-  
-      showAlert(`You borrowed "${book.title}". Due date: ${book.dueDate}`, "success");
+        book.isAvailability = false;
+        book.borrowedBy = currentUser.username;
+
+        // Calculate the due date (10 days from today)
+        const currentDate = new Date();
+        const dueDate = new Date(currentDate);
+        dueDate.setDate(currentDate.getDate() + 10); // Add 10 days
+        book.dueDate = dueDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+
+        showAlert(`You borrowed "${book.title}". Due date: ${book.dueDate}`, "success");
     } else if (
-      action === "return" &&
-      !book.isAvailability &&
-      book.borrowedBy === currentUser.username
+        action === "return" &&
+        !book.isAvailability &&
+        book.borrowedBy === currentUser.username
     ) {
-      book.isAvailability = true;
-      book.borrowedBy = null;
-      book.dueDate = null; 
-      showAlert(`You returned "${book.title}"`, "warning");
+        book.isAvailability = true;
+        book.borrowedBy = null;
+        book.dueDate = null;
+        showAlert(`You returned "${book.title}"`, "warning");
     } else if (action === "delete" && currentUser?.role === "librarian") {
-      if (confirm(`Delete "${book.title}"?`)) {
-        books = books.filter((b) => b.id !== bookId);
-        showAlert(`"${book.title}" deleted`, "danger");
-      } else {
-        return;
-      }
+        // Prevent deletion if the book is borrowed
+        if (!book.isAvailability) {
+            showAlert(`Cannot delete "${book.title}" because it is currently borrowed by ${book.borrowedBy}.`, "danger");
+            return;
+        }
+
+        if (confirm(`Delete "${book.title}"?`)) {
+            books = books.filter((b) => b.id !== bookId);
+            showAlert(`"${book.title}" deleted`, "danger");
+        } else {
+            return;
+        }
     } else {
-      return showAlert("Action not allowed", "danger");
+        return showAlert("Action not allowed", "danger");
     }
-  
+
     saveBooks();
     displayBooks();
-  }
+}
 
 // Update UI based on login state
 
@@ -226,6 +231,8 @@ async function updateUI() {
 
     displayBooks();
 
+    // retrieveOverdueBooks();
+
     // Display borrowed books for librarian
     if (currentUser.role === "librarian") {
       displayBorrowedBooksForLibrarian();
@@ -236,6 +243,8 @@ async function updateUI() {
     userDashboard.style.display = "none";
     librarianDashboard.style.display = "none";
   }
+  if (aboutUsSection) aboutUsSection.style.display = "block";
+
 }
 
 // Event listeners
@@ -416,33 +425,84 @@ function logBorrow(book, user) {
     });
   }
 
+
+
   function displayBorrowedBooksForLibrarian() {
     const borrowedBooksListForLibrarian = document.getElementById("borrowedBooksListForLibrarian");
-  
+
     if (borrowedBooksListForLibrarian) borrowedBooksListForLibrarian.innerHTML = "";
-  
+
     // Filter books that are currently borrowed
-    const borrowedBooks = books.filter((book) => !book.isAvailability);
-  
+    const borrowedBooks = books.filter(book => !book.isAvailability);
+
     // Render each borrowed book
-    borrowedBooks.forEach((book) => {
-      const bookCard = `
-        <div class="book-card d-flex">
-          <img src="${book.coverImage}" alt="${book.title}">
-          <div class="book-info">
-            <strong>${book.title}</strong>
-            <p>By: ${book.author}</p>
-            <p>Genre: ${book.genre}</p>
-            <p>Borrowed By: ${book.borrowedBy || "Unknown"}</p>
-            <p>Due Date: ${book.dueDate || []}</p>
-          </div>
-        </div>
-      `;
-      borrowedBooksListForLibrarian.innerHTML += bookCard;
+    borrowedBooks.forEach(book => {
+        const isOverdue = book.dueDate && new Date() > new Date(book.dueDate);
+        const bookCard = `
+            <div class="book-card d-flex ${isOverdue ? 'overdue' : ''}">
+                <img src="${book.coverImage}" alt="${book.title}">
+                <div class="book-info">
+                    <strong>${book.title}</strong>
+                    <p>By: ${book.author}</p>
+                    <p>Genre: ${book.genre}</p>
+                    <p>Borrowed By: ${book.borrowedBy || "Unknown"}</p>
+                    <p>Due Date: ${book.dueDate || "N/A"}</p>
+                    ${isOverdue ? '<p class="text-danger">Overdue</p>' : ''}
+                </div>
+            </div>
+        `;
+        borrowedBooksListForLibrarian.innerHTML += bookCard;
     });
-  }
+}
+  function checkOverdueBooks() {
+    const overdueBooks = books.filter(book => {
+        if (!book.isAvailability && book.dueDate) {
+            const currentDate = new Date();
+            const dueDate = new Date(book.dueDate);
+            return currentDate > dueDate; // Check if the current date is past the due date
+        }
+        return false;
+    });
 
+    if (overdueBooks.length > 0) {
+        overdueBooks.forEach(book => {
+            console.warn(`Overdue Book: "${book.title}" borrowed by ${book.borrowedBy}`);
+        });
+        showAlert(`There are ${overdueBooks.length} overdue books.`, "warning");
+    } else {
+        console.log("No overdue books.");
+    }
+}
+function retrieveOverdueBooks() {
+  const currentDate = new Date();
+  books.forEach(book => {
+      if (!book.isAvailability && book.dueDate) {
+          const dueDate = new Date(book.dueDate);
+          if (currentDate > dueDate) {
+              book.isAvailability = true;
+              book.borrowedBy = null;
+              book.dueDate = null;
+              console.log(`Book "${book.title}" has been marked as retrieved.`);
+          }
+      }
+  });
 
+  saveBooks();
+  displayBooks();
+  showAlert("Overdue books have been retrieved.", "info");
+}
+
+setInterval(() => {
+  checkOverdueBooks();
+}, 24 * 60 * 60 * 1000); // Check once every 24 hours
+
+function calculateFine(book) {
+  const currentDate = new Date();
+  const dueDate = new Date(book.dueDate);
+  const overdueDays = Math.ceil((currentDate - dueDate) / (1000 * 60 * 60 * 24)); // Calculate days
+  const finePerDay = 5; // Example: $5 per day
+  return overdueDays > 0 ? overdueDays * finePerDay : 0;
+}
    
 // Initialize
 updateUI();
