@@ -1,8 +1,8 @@
 
 // State
 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-let books = JSON.parse(localStorage.getItem('books')) || [];
-let users = JSON.parse(localStorage.getItem('users')) || [];
+let books = JSON.parse(localStorage.getItem('books')) || null;
+let users = JSON.parse(localStorage.getItem('users')) || null;
 
 // Load data from JSON
 async function loadLibraryData() {
