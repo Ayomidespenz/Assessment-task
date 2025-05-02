@@ -11,14 +11,12 @@ async function loadLibraryData() {
         if (!response.ok) 
           throw new Error('Failed to fetch data.json');
         // const data = await response.json();
-// console.log(data, 88);
-if(books.length === 0) {
-    console.log('no books');
-    books = await response.json()
-    console.log(books,88);
-    
-    
-}
+
+// if(books.length === 0) {
+//     console.log('no books');
+//     books = await response.json()
+//     console.log(books,88);  
+// }
 
 
 
@@ -175,8 +173,9 @@ function handleBookAction(bookId, action) {
         // Calculate the due date (10 days from today)
         const currentDate = new Date();
         const dueDate = new Date(currentDate);
-        dueDate.setDate(currentDate.getDate() + 10); // Add 10 days
-        book.dueDate = dueDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+        dueDate.setDate(currentDate.getDate() + 10); 
+        const formattedDate = dueDate.toLocaleDateString('en-CA'); 
+        book.dueDate = formattedDate;
 
         showAlert(`You borrowed "${book.title}". Due date: ${book.dueDate}`, "success");
     } else if (
@@ -500,7 +499,7 @@ function retrieveOverdueBooks() {
 
 setInterval(() => {
   checkOverdueBooks();
-}, 24 * 60 * 60 * 1000); // Check once every 24 hours
+}, 24 * 60 * 60 * 1000); 
 
 function calculateFine(book) {
   const currentDate = new Date();

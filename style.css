@@ -63,7 +63,7 @@ body {
   background-color: #0056b3;
   border-color: #0056b3;
 }
-/* Navigation Bar */
+
 .navbar {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   background-color: #ffffff67;
@@ -95,7 +95,7 @@ body {
   margin-left: 15px;
 }
 
-/* Hero Section */
+
 .hero-section {
   position: relative;
   width: 100%;
@@ -161,7 +161,7 @@ body {
   transform: scale(1.05);
 }
 
-/* Login Modal */
+
 .modal-content {
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -194,7 +194,7 @@ body {
   border-color: #34495e;
 }
 
-/* Dashboard Section */
+
 .dashboard-container {
   max-width: 1200px;
   margin: 80px auto 40px;
@@ -211,7 +211,7 @@ body {
   text-align: center;
 }
 
-/* Search Input and Buttons */
+
 #searchInput {
   width: 100%;
   max-width: 600px;
@@ -234,7 +234,6 @@ body {
 
 #searchButton {
   background-color: #3b6796;
-  /* border-color: #007bff; */
   border: none;
   margin-left: 75%;
   color: #fff;
@@ -246,7 +245,6 @@ body {
 
 #clearSearch {
   background-color: #6c757d;
-  /* border-color: #6c757d; */
   border: none;
   color: #fff;
 }
@@ -255,7 +253,6 @@ body {
   background-color: #5a6268;
 }
 
-/* Book Cards */
 .book-card {
   background-color: #fff;
   border: 1px solid #ddd;
@@ -311,7 +308,6 @@ body {
   opacity: 0.7;
 }
 
-/* User Dashboard */
 #userBookList,
 #borrowedBooksList {
   display: grid;
@@ -326,7 +322,7 @@ body {
   margin-bottom: 20px;
 }
 
-/* Librarian Dashboard */
+
 #librarianDashboard h3 {
   font-size: 1.8rem;
   color: #2c3e50;
@@ -350,7 +346,7 @@ body {
   gap: 20px;
 }
 
-/* Responsive Adjustments */
+
 @media (max-width: 768px) {
   .hero-content h1 {
     font-size: 2rem;
