@@ -1,6 +1,6 @@
 
 // State
-let currentUser = JSON.parse(localStorage.getItem('currentUser')) || [];
+let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 let books = JSON.parse(localStorage.getItem('books')) || [];
 let users = JSON.parse(localStorage.getItem('users')) || [];
 
@@ -373,7 +373,7 @@ document.getElementById("addBookForm")?.addEventListener("submit", (e) => {
   // Save the updated books array to localStorage
   saveBooks();
 
-  // Update the UI
+  
   displayBooks();
 
   // Show success message
@@ -505,8 +505,8 @@ setInterval(() => {
 function calculateFine(book) {
   const currentDate = new Date();
   const dueDate = new Date(book.dueDate);
-  const overdueDays = Math.ceil((currentDate - dueDate) / (1000 * 60 * 60 * 24)); // Calculate days
-  const finePerDay = 5; // Example: $5 per day
+  const overdueDays = Math.ceil((currentDate - dueDate) / (1000 * 60 * 60 * 24)); 
+  const finePerDay = 5; 
   return overdueDays > 0 ? overdueDays * finePerDay : 0;
 }
    
